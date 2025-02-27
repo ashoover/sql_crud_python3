@@ -21,7 +21,7 @@ def create_table():
     
     conn = sqlite3.connect(table_name)
     cur = conn.cursor()
-    cur.execute('CREATE TABLE IF NOT EXISTS tracking_info (id INTEGER PRIMARY KEY, opened TEXT, last_updated TEXT, jsm_tcket TEXT, zabbix_id TEXT)')
+    cur.execute('CREATE TABLE IF NOT EXISTS tracking_info (id INTEGER PRIMARY KEY, opened TEXT, last_updated TEXT, jsm_ticket TEXT, zabbix_id TEXT)')
     conn.commit()
     cur.close()
 
@@ -31,7 +31,7 @@ def create_record(opened, last_updated, jsm_ticket, zabbix_id):
     # Connect to the database and insert a record
     conn = sqlite3.connect(table_name)
     cur = conn.cursor()
-    cur.execute("INSERT INTO tracking_info (opened, last_updated, jsm_ticket, zabbix_id) VALUES (?, ?)", (opened, last_updated, jsm_ticket, zabbix_id))
+    cur.execute("INSERT INTO tracking_info (opened, last_updated, jsm_ticket, zabbix_id) VALUES (?, ?, ?, ?)", (opened, last_updated, jsm_ticket, zabbix_id))
     conn.commit()
     cur.close()
 
@@ -57,8 +57,7 @@ def update_record(id, last_updated):
     cur.close()
 
 # Connect to the database and delete a record
-def delete_record(id):
-    
+def delete_record(id):    
     conn = sqlite3.connect(table_name)
     cur = conn.cursor()
     cur.execute("DELETE FROM tracking_info WHERE id=?", (id,))
@@ -77,7 +76,7 @@ def check_for_ticket(zabbix_id):
         # if it doens't exist, run the create_record function
         create_record()
 
-        
+
 
 # Creates the table structure, if it doesn't exist
 create_table()
@@ -89,7 +88,7 @@ create_record(fake_opened, fake_last_updated, fake_jsm_ticket, fake_zabbix_id)
 print(read_record(1))
 
 # Updates a current records information
-update_record(1, fake_opened, fake_last_updated, fake_jsm_ticket, fake_zabbix_id)
+update_record(1, fake_zabbix_id)
 
 # Deletes a particule entry in the sqlite db
 #delete_record(1)
