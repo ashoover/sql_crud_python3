@@ -1,30 +1,29 @@
 import sqlite3
 import datetime
+import argparse
 from random import randrange # only used for testing
 
 
+# Import runtime arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("zab_id")
+args = parser.parse_args()
+
+
 # Random Vars
+zabbix_id = args.zab_id
 table_name = 'tracking.db'
 c_time = (datetime.datetime.now())
-
-
-# testing data for script
-fake_opened = c_time
-fake_last_updated = c_time
-fake_jsm_ticket = f'MOSAICX-{randrange(200, 5000)}'
-fake_zabbix_id = f'ZABBIX-{randrange(200, 5000)}'
-# end of testing data
+dev_mode = True
 
 
 # Attempt to connect to the database and create a new table if it doesn't exist
 def create_table():
-    
     conn = sqlite3.connect(table_name)
     cur = conn.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS tracking_info (id INTEGER PRIMARY KEY, opened TEXT, last_updated TEXT, jsm_ticket TEXT, zabbix_id TEXT)')
     conn.commit()
     cur.close()
-
 
 #add current dt to output
 def create_record(opened, last_updated, jsm_ticket, zabbix_id):
@@ -34,7 +33,6 @@ def create_record(opened, last_updated, jsm_ticket, zabbix_id):
     cur.execute("INSERT INTO tracking_info (opened, last_updated, jsm_ticket, zabbix_id) VALUES (?, ?, ?, ?)", (opened, last_updated, jsm_ticket, zabbix_id))
     conn.commit()
     cur.close()
-
 
 def read_record(zabbix_id):
     # Connect to the database and retrieve a record
@@ -47,12 +45,11 @@ def read_record(zabbix_id):
     else:
         return None
 
-
 def update_record(id, last_updated):
     # Connect to the database and update a record's information
     conn = sqlite3.connect(table_name)
     cur = conn.cursor()
-    cur.execute("UPDATE tracking_info SET last_updated=? WHERE id=?", (last_updated, id))
+    cur.execute("UPDATE tracking_info SET last_updated=? WHERE id=?", (datetime.datetime.now(), id))
     conn.commit()
     cur.close()
 
@@ -77,20 +74,32 @@ def check_for_ticket(zabbix_id):
         create_record()
 
 
+def devmode():
+    # testing data for script
+    fake_opened = c_time
+    fake_last_updated = c_time
+    fake_jsm_ticket = f'MOSAICX-{randrange(200, 5000)}'
+    fake_zabbix_id = f'ZABBIX-{randrange(200, 5000)}'
+    # end of testing data
 
-# Creates the table structure, if it doesn't exist
-create_table()
+    # Creates the table structure, if it doesn't exist
+    create_table()
 
-# Creates a db entry
-create_record(fake_opened, fake_last_updated, fake_jsm_ticket, fake_zabbix_id)
+    # Creates a db entry
+    create_record(fake_opened, fake_last_updated, fake_jsm_ticket, fake_zabbix_id)
 
-# Pulls data from the db
-print(read_record(1))
+    # Pulls data from the db
+    print(read_record(1))
 
-# Updates a current records information
-update_record(1, fake_zabbix_id)
+    # Updates a current records information
+    update_record(1, fake_zabbix_id)
 
-# Deletes a particule entry in the sqlite db
-#delete_record(1)
+    # Deletes a particule entry in the sqlite db
+    #delete_record(1)
 
-print(f'Script finished at {c_time}')
+    print(f'DEV MODE : Script finished at {c_time}')
+
+if dev_mode == True:
+    dev_mode()
+else:
+    print(f"Prod mode run for: {zabbix_id}") # replace with your code
